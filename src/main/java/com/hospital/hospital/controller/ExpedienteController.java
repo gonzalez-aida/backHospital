@@ -3,6 +3,8 @@ package com.hospital.hospital.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.springframework.http.HttpStatus; 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,7 @@ public class ExpedienteController {
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("status", status.value());
         respuesta.put("mensaje", mensaje);
+        respuesta.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
         if (data != null) {
             respuesta.put("data", data);
         }
