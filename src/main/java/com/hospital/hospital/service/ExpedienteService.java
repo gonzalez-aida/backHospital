@@ -28,6 +28,14 @@ public class ExpedienteService {
         return expedienteRepository.findById(id_expediente).orElse(null);
     } //obtener expediente por id
 
+    public List<Expediente> getExpedientesByMedico(Long idMedico) {
+        return expedienteRepository.findByIdMedico(idMedico);
+    } //obtener expedientes por id de médico
+
+    public List<Expediente> getExpedientesByPaciente(Long idPaciente) {
+        return expedienteRepository.findByIdPaciente(idPaciente);
+    } //obtener expedientes por id de paciente
+
     public void deleteExpediente(Long id_expediente) {
         expedienteRepository.deleteById(id_expediente);
     } //eliminar expediente por id
