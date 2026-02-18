@@ -1,5 +1,80 @@
 package com.hospital.hospital.controller;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.http.HttpStatus; 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import com.hospital.hospital.model.entity.Expediente;
+import com.hospital.hospital.service.ExpedienteService;
+
+@RestController
+@RequestMapping("/expedientes")
+@CrossOrigin(origins = "*")
 public class ExpedienteController {
-    
+
+    private final ExpedienteService expedienteService;
+
+    public ExpedienteController(ExpedienteService expedienteService) {
+        this.expedienteService = expedienteService;
+    }
+
+    // método solo se usará para ERRORES o mensajes específicos
+    private ResponseEntity<Object> generarRespuesta(Object data, String mensaje, HttpStatus status) {
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("status", status.value());
+        respuesta.put("mensaje", mensaje);
+        if (data != null) {
+            respuesta.put("data", data);
+        }
+        return new ResponseEntity<>(respuesta, status);
+    }
+
+    @PostMapping
+    public ResponseEntity<Object> createExpediente(@RequestBody Expediente expediente) {
+        Expediente nuevo = expedienteService.saveExpediente(expediente);
+        // ÉXITO: Envía solo los datos del nuevo expediente
+        return generarRespuesta(nuevo, "Expediente creado exitosamente", HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<Object> getAllExpedientes() {
+        List<Expediente> lista = expedienteService.getAllExpedientes(); 
+        return generarRespuesta(lista, "Lista de expedientes obtenida exitosamente", HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getExpedienteById(@PathVariable Long id) {
+        Expediente e = expedienteService.getExpedienteById(id);
+        if (e != null) {
+            // ÉXITO: Envía solo los datos del expediente
+            return generarRespuesta(e, "Expediente encontrado", HttpStatus.OK);
+        }
+        // ERROR: Envía mensaje y estatus
+        return generarRespuesta(null,"El expediente con ID " + id + " no existe", HttpStatus.NOT_FOUND);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> actualizar(@PathVariable Long id, @RequestBody Expediente actualizado) {
+        Expediente updated = expedienteService.updateExpediente(id, actualizado);
+        if (updated != null) {
+            // ÉXITO: Envía solo los datos actualizados
+            return generarRespuesta(updated, "Expediente actualizado exitosamente", HttpStatus.OK);
+        }
+        // ERROR: Envía mensaje y estatus
+        return generarRespuesta(null, "No se pudo actualizar: ID " + id + " no encontrado", HttpStatus.NOT_FOUND);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteExpediente(@PathVariable Long id) {
+        Expediente e = expedienteService.getExpedienteById(id);
+        if (e != null) {
+            expedienteService.deleteExpediente(id);
+            // ÉXITO: En un delete exitoso, solemos enviar un mensaje de confirmación
+            return generarRespuesta(null, "Expediente eliminado correctamente", HttpStatus.OK);
+        }
+        // ERROR: Envía mensaje y estatus
+        return generarRespuesta(null, "Error al eliminar: ID " + id + " no existe", HttpStatus.NOT_FOUND);
+    }
 }
