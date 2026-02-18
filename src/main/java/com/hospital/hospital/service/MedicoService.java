@@ -19,7 +19,7 @@ public class MedicoService {
 
     @Transactional
     public Medico registrarMedico(String correo, String contrasena, String nombre,
-                                   String especialidad, String cedulaProfesional) {
+            String especialidad, String cedulaProfesional) {
 
         if (usuarioRepository.existsByCorreo(correo)) {
             throw new RuntimeException("El correo ya está registrado: " + correo);
