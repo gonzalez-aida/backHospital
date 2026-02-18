@@ -12,9 +12,20 @@ public class Expediente {
     @Column(name = "id_expediente")
     private Long idExpediente;
     
-    private String alergias;
-    private String antecedentes;
-    private String observaciones;
+    @ElementCollection
+    @CollectionTable(name = "expediente_alergias", joinColumns = @JoinColumn(name = "id_expediente"))
+    @Column(name = "alergias")
+    private List<String> alergias;
+
+    @ElementCollection
+    @CollectionTable(name = "expediente_antecedentes", joinColumns = @JoinColumn(name = "id_expediente"))
+    @Column(name = "antecedentes")
+    private List<String> antecedentes;
+
+    @ElementCollection
+    @CollectionTable(name = "expediente_observaciones", joinColumns = @JoinColumn(name = "id_expediente"))
+    @Column(name = "observaciones")
+    private List<String> observaciones;
     
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion = LocalDateTime.now();
