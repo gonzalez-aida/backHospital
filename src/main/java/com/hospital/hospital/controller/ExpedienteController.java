@@ -3,6 +3,8 @@ package com.hospital.hospital.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.springframework.http.HttpStatus; 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,7 @@ public class ExpedienteController {
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("status", status.value());
         respuesta.put("mensaje", mensaje);
+        respuesta.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
         if (data != null) {
             respuesta.put("data", data);
         }
@@ -53,7 +56,29 @@ public class ExpedienteController {
         }
         // ERROR: Envía mensaje y estatus
         return generarRespuesta(null,"El expediente con ID " + id + " no existe", HttpStatus.NOT_FOUND);
-    }
+    } 
+
+    @GetMapping("/medico/{idMedico}")
+    public ResponseEntity<Object> getExpedientesByMedico(@PathVariable Long idMedico) { 
+        List<Expediente> e = expedienteService.getExpedientesByMedico(idMedico);
+        
+        if (e != null && !e.isEmpty()) {
+            return generarRespuesta(e, "Expedientes encontrados para el médico " + idMedico, HttpStatus.OK);
+        }
+        
+        return generarRespuesta(null, "El médico con ID " + idMedico + " no tiene expedientes asociados", HttpStatus.NOT_FOUND);
+    } 
+
+    @GetMapping("/paciente/{idPaciente}")
+    public ResponseEntity<Object> getExpedientesByPaciente(@PathVariable Long idPaciente) { 
+        List<Expediente> e = expedienteService.getExpedientesByPaciente(idPaciente);
+        
+        if (e != null && !e.isEmpty()) {
+            return generarRespuesta(e, "Expedientes encontrados para el paciente " + idPaciente, HttpStatus.OK);
+        }
+        
+        return generarRespuesta(null, "El paciente con ID " + idPaciente + " no tiene expedientes asociados", HttpStatus.NOT_FOUND);
+    }       
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> actualizar(@PathVariable Long id, @RequestBody Expediente actualizado) {
