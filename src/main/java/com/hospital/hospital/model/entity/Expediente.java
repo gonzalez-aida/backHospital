@@ -17,8 +17,27 @@ public class Expediente {
     @Column(name = "id_expediente")
     private Long idExpediente;
     
-    private String alergias;
-    private String antecedentes;
+    @Column(name = "folio", length = 30, nullable = false, unique = true)
+    private String folio;
+
+    @Column(columnDefinition = "TEXT")
+    private String ant_heredofamiliares;
+
+    @Column(columnDefinition = "TEXT")
+    private String ant_patologicos;
+
+    @Column(columnDefinition = "TEXT")
+    private String ant_quirurgicos;
+
+    @Column(columnDefinition = "TEXT")
+    private String ant_alergicos;
+
+    @Column(columnDefinition = "TEXT")
+    private String enf_cronicas;
+
+    @Column(columnDefinition = "TEXT")
+    private String ant_ginecoobstetricos;
+
     private String observaciones;
     
     @Column(name = "fecha_apertura", nullable = false, updatable = false)
