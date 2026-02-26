@@ -28,10 +28,6 @@ public class ExpedienteService {
         return expedienteRepository.findById(id_expediente).orElse(null);
     } //obtener expediente por id
 
-    public List<Expediente> getExpedientesByMedico(Long idMedico) {
-        return expedienteRepository.findByIdMedico(idMedico);
-    } //obtener expedientes por id de médico
-
     public List<Expediente> getExpedientesByPaciente(Long idPaciente) {
         return expedienteRepository.findByIdPaciente(idPaciente);
     } //obtener expedientes por id de paciente
@@ -42,23 +38,49 @@ public class ExpedienteService {
 
     public Expediente updateExpediente(Long id, Expediente actualizado) {
         return expedienteRepository.findById(id).map(existente -> {
-            // Solo actualiza si el campo enviado NO es nulo
-            if (actualizado.getAlergias() != null) {
-                existente.setAlergias(actualizado.getAlergias());
+
+            if (actualizado.getFolio() != null) {
+                existente.setFolio(actualizado.getFolio());
             }
-            if (actualizado.getAntecedentes() != null) {
-                existente.setAntecedentes(actualizado.getAntecedentes());
+
+            if (actualizado.getAnt_heredofamiliares() != null) {
+                existente.setAnt_heredofamiliares(actualizado.getAnt_heredofamiliares());
             }
+
+            if (actualizado.getAnt_patologicos() != null) {
+                existente.setAnt_patologicos(actualizado.getAnt_patologicos());
+            }
+
+            if (actualizado.getAnt_quirurgicos() != null) {
+                existente.setAnt_quirurgicos(actualizado.getAnt_quirurgicos());
+            }
+
+            if (actualizado.getAnt_alergicos() != null) {
+                existente.setAnt_alergicos(actualizado.getAnt_alergicos());
+            }
+
+            if (actualizado.getAnt_cronicas() != null) {
+                existente.setAnt_cronicas(actualizado.getAnt_cronicas());
+            }
+
+            if (actualizado.getAnt_ginecoobstetricos() != null) {
+                existente.setAnt_ginecoobstetricos(actualizado.getAnt_ginecoobstetricos());
+            }
+
             if (actualizado.getObservaciones() != null) {
                 existente.setObservaciones(actualizado.getObservaciones());
             }
+
+            if (actualizado.getIdPaciente() != null) {
+                existente.setIdPaciente(actualizado.getIdPaciente());
+            }
+
             if (actualizado.getIdMedico() != null) {
                 existente.setIdMedico(actualizado.getIdMedico());
             }
-            // No tocamos la fecha de creación ni el idPaciente si no vienen
-            
+
             return expedienteRepository.save(existente);
+
         }).orElse(null);
     }
-        
 }
