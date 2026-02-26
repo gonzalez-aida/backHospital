@@ -58,17 +58,6 @@ public class ExpedienteController {
         return generarRespuesta(null,"El expediente con ID " + id + " no existe", HttpStatus.NOT_FOUND);
     } 
 
-    @GetMapping("/medico/{idMedico}")
-    public ResponseEntity<Object> getExpedientesByMedico(@PathVariable Long idMedico) { 
-        List<Expediente> e = expedienteService.getExpedientesByMedico(idMedico);
-        
-        if (e != null && !e.isEmpty()) {
-            return generarRespuesta(e, "Expedientes encontrados para el médico " + idMedico, HttpStatus.OK);
-        }
-        
-        return generarRespuesta(null, "El médico con ID " + idMedico + " no tiene expedientes asociados", HttpStatus.NOT_FOUND);
-    } 
-
     @GetMapping("/paciente/{idPaciente}")
     public ResponseEntity<Object> getExpedientesByPaciente(@PathVariable Long idPaciente) { 
         List<Expediente> e = expedienteService.getExpedientesByPaciente(idPaciente);
