@@ -1,18 +1,18 @@
 package com.hospital.hospital.config;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
@@ -26,48 +26,23 @@ import java.util.Arrays;
 public class ResourceServer {
 
     @Bean
-    @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-                new OAuth2AuthorizationServerConfigurer();
-
-        // Aplica el securityMatcher usando el configurer (forma correcta moderna)
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
-            .with(authorizationServerConfigurer, configurer ->
-                configurer.oidc(Customizer.withDefaults()) // Habilita OpenID Connect
-            )
-            .authorizeHttpRequests(authorize ->
-                authorize.anyRequest().authenticated()
-            )
-            .exceptionHandling(exceptions -> exceptions
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-            )
-            .cors(Customizer.withDefaults());
-
-        return http.build();
-    }
-
-    @Bean
-    @Order(2)
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .securityMatcher("/api/**", "/error")
-            .cors(Customizer.withDefaults())
+            .cors(customizer -> customizer.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/auth/exchange-code").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/paciente/registro").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/medico/registro").permitAll()
-                //.requestMatchers("/api/medico/**").hasAuthority("MEDICO")
-                //.requestMatchers("/api/paciente/**").hasAuthority("PACIENTE")
+                .requestMatchers("/api/medico/**").hasAuthority("MEDICO")
+                .requestMatchers("/api/paciente/**").hasAnyAuthority("PACIENTE", "MEDICO")
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
+                .bearerTokenResolver(cookieBearerTokenResolver()) // 👈 esto faltaba
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
             )
             .exceptionHandling(exceptions -> exceptions
@@ -77,10 +52,43 @@ public class ResourceServer {
         return http.build();
     }
 
+    // 👈 este método faltaba completo
+    @Bean
+    public BearerTokenResolver cookieBearerTokenResolver() {
+        return (HttpServletRequest request) -> {
+            // Primero intenta leer de la cookie
+            if (request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if ("access_token".equals(cookie.getName())) {
+                        return cookie.getValue();
+                    }
+                }
+            }
+            // Si no hay cookie, lee el header Authorization (Thunder Client)
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                return authHeader.substring(7);
+            }
+            return null;
+        };
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
+        converter.setAuthoritiesClaimName("authorities");
+        converter.setAuthorityPrefix("");
+
+        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
+        jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
+        return jwtConverter;
+    }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:4200",
             "http://localhost:5173",
             "http://localhost:4173",
             "https://www.produccionxd.com"
@@ -92,15 +100,5 @@ public class ResourceServer {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    private JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("authorities");
-        grantedAuthoritiesConverter.setAuthorityPrefix("");
-
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-        return jwtAuthenticationConverter;
     }
 }
