@@ -1,5 +1,7 @@
 package com.hospital.hospital.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.hospital.hospital.model.entity.Paciente;
 import com.hospital.hospital.model.entity.Usuario;
 import com.hospital.hospital.model.repository.PacienteRepository;
@@ -7,7 +9,6 @@ import com.hospital.hospital.model.repository.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -16,14 +17,35 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class PacienteService {
 
+    @Autowired
+    private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository usuarioRepository;
     private final PacienteRepository pacienteRepository;
-    private final PasswordEncoder passwordEncoder;
+
+    public Paciente obtenerPorId(Integer id) {
+        return pacienteRepository.obtenerConUsuario(id)
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+    }
+
+    public Paciente actualizar(Integer id, Paciente pacienteActualizado) {
+
+        Paciente paciente = pacienteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+
+        paciente.setNombre(pacienteActualizado.getNombre());
+        paciente.setApellido(pacienteActualizado.getApellido());
+        paciente.setFechaNacimiento(pacienteActualizado.getFechaNacimiento());
+        paciente.setSexo(pacienteActualizado.getSexo());
+        paciente.setTelefono(pacienteActualizado.getTelefono());
+        paciente.setTipoSangre(pacienteActualizado.getTipoSangre());
+
+        return pacienteRepository.save(paciente);
+    }
 
     @Transactional
     public Paciente registrarPaciente(String correo, String contrasena, String nombre,
-                                      String apellido, LocalDate fechaNacimiento,
-                                      Paciente.Sexo sexo, String telefono, String tipoSangre) {
+            String apellido, LocalDate fechaNacimiento,
+            Paciente.Sexo sexo, String telefono, String tipoSangre) {
 
         if (usuarioRepository.existsByCorreo(correo)) {
             throw new RuntimeException("El correo ya está registrado: " + correo);
