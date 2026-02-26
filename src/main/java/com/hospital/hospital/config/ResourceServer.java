@@ -35,6 +35,12 @@ public class ResourceServer {
             )
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**",
+                    "/v3/api-docs.yaml"
+                ).permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/paciente/registro").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/medico/registro").permitAll()
                 .requestMatchers("/api/medico/**").hasAuthority("MEDICO")
