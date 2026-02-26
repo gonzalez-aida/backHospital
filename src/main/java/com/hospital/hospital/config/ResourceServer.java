@@ -45,7 +45,7 @@ public class ResourceServer {
                 .requestMatchers(HttpMethod.POST, "/api/medico/registro").permitAll()
                 .requestMatchers("/api/medico/**").hasAuthority("MEDICO")
                 .requestMatchers("/api/paciente/**").hasAnyAuthority("PACIENTE", "MEDICO")
-                .requestMatchers("/api/expedientes/**").hasAnyAuthority("PACIENTE", "MEDICO")
+                .requestMatchers("/expedientes/**").hasAnyAuthority("PACIENTE", "MEDICO")
                 .requestMatchers("/diagnosticos/**").hasAnyAuthority("PACIENTE", "MEDICO")
                 .requestMatchers("/signos-vitales/**").hasAnyAuthority("PACIENTE", "MEDICO")
                 .requestMatchers("/medicamentos/**").hasAnyAuthority("PACIENTE", "MEDICO")
