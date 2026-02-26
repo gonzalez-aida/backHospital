@@ -3,9 +3,9 @@ package com.hospital.hospital.model.repository;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository; 
-import com.hospital.hospital.model.entity.Expediente;
+import com.hospital.hospital.model.entity.Diagnostico;
 
 @Repository
-public interface ExpedienteRepository extends JpaRepository<Expediente, Long> {
-    List<Expediente> findByIdPaciente(Long idPaciente);
+public interface DiagnosticoRepository extends JpaRepository<Diagnostico, Long> {
+    List<Diagnostico> findByIdCita(Long idCita);
 }
