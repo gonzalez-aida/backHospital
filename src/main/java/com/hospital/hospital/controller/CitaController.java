@@ -1,0 +1,55 @@
+package com.hospital.hospital.controller;
+
+import com.hospital.hospital.model.entity.Cita;
+import com.hospital.hospital.service.CitaService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/cita")
+@RequiredArgsConstructor
+public class CitaController {
+
+    private final CitaService citaService;
+
+    @PostMapping("/agendar")
+    public ResponseEntity<?> agendarCita(@RequestBody Map<String, Object> body) {
+        try {
+            Cita cita = citaService.agendarCita(
+                    (Integer) body.get("idPaciente"),
+                    LocalDate.parse((String) body.get("fecha")),
+                    LocalTime.parse((String) body.get("hora")),
+                    (String) body.get("motivo"),
+                    Cita.TipoCita.valueOf((String) body.get("tipo")));
+            return ResponseEntity.status(HttpStatus.CREATED).body(cita);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/paciente/{idPaciente}")
+    public ResponseEntity<?> obtenerCitas(@PathVariable Integer idPaciente) {
+        try {
+            List<Cita> citas = citaService.obtenerCitasPorPaciente(idPaciente);
+            return ResponseEntity.ok(citas);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/cancelar/{idCita}")
+    public ResponseEntity<?> cancelarCita(@PathVariable Integer idCita) {
+        try {
+            return ResponseEntity.ok(citaService.cancelarCita(idCita));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+}

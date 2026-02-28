@@ -24,11 +24,12 @@ public class PacienteController {
                     (String) body.get("correo"),
                     (String) body.get("contrasena"),
                     (String) body.get("nombre"),
-                    (String) body.get("apellido"),
+                    (String) body.get("apPaterno"),
+                    (String) body.get("apMaterno"),
                     LocalDate.parse((String) body.get("fechaNacimiento")),
                     Paciente.Sexo.valueOf((String) body.get("sexo")),
                     (String) body.get("telefono"),
-                    (String) body.get("tipoSangre"));
+                    Paciente.TipoSangre.valueOf((String) body.get("tipoSangre")));
             return ResponseEntity.status(HttpStatus.CREATED).body(paciente);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
@@ -36,15 +37,22 @@ public class PacienteController {
     }
 
     @GetMapping("/{id}")
-    public Paciente obtenerPorId(@PathVariable Integer id) {
-        return service.obtenerPorId(id);
+    public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(service.obtenerPorId(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")
-    public Paciente actualizar(
+    public ResponseEntity<?> actualizar(
             @PathVariable Integer id,
             @RequestBody Paciente paciente) {
-
-        return service.actualizar(id, paciente);
+        try {
+            return ResponseEntity.ok(service.actualizar(id, paciente));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
     }
 }
