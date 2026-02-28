@@ -28,36 +28,41 @@ public class ResourceServer {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(customizer -> customizer.configurationSource(corsConfigurationSource()))
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**",
-                    "/v3/api-docs.yaml"
-                ).permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/paciente/registro").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/medico/registro").permitAll()
-                .requestMatchers("/api/medico/**").hasAuthority("MEDICO")
-                .requestMatchers("/api/paciente/**").hasAnyAuthority("PACIENTE", "MEDICO")
-                .requestMatchers("/expedientes/**").hasAnyAuthority("PACIENTE", "MEDICO")
-                .requestMatchers("/diagnosticos/**").hasAnyAuthority("PACIENTE", "MEDICO")
-                .requestMatchers("/signos-vitales/**").hasAnyAuthority("PACIENTE", "MEDICO")
-                .requestMatchers("/medicamentos/**").hasAnyAuthority("PACIENTE", "MEDICO")
-                .anyRequest().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .bearerTokenResolver(cookieBearerTokenResolver()) // 👈 esto faltaba
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-            )
-            .exceptionHandling(exceptions -> exceptions
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-            );
+                .cors(customizer -> customizer.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/paciente/registro").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/medico/registro").permitAll()
+                        // jenni
+                        .requestMatchers(HttpMethod.GET, "/api/paciente/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/paciente/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/receta/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/cita/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/cita/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/cita/**").permitAll()
+
+                        .requestMatchers("/api/medico/**").hasAuthority("MEDICO")
+                        .requestMatchers("/api/paciente/**").hasAnyAuthority("PACIENTE", "MEDICO")
+                        .requestMatchers("/expedientes/**").hasAnyAuthority("PACIENTE", "MEDICO")
+                        .requestMatchers("/api/receta/**").hasAnyAuthority("PACIENTE", "MEDICO")
+                        .requestMatchers("/api/cita/**").hasAnyAuthority("PACIENTE", "MEDICO")
+                        .requestMatchers("/diagnosticos/**").hasAnyAuthority("PACIENTE", "MEDICO")
+                        .requestMatchers("/signos-vitales/**").hasAnyAuthority("PACIENTE", "MEDICO")
+                        .requestMatchers("/medicamentos/**").hasAnyAuthority("PACIENTE", "MEDICO")
+                        .anyRequest().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .bearerTokenResolver(cookieBearerTokenResolver()) // 👈 esto faltaba
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
 
         return http.build();
     }
@@ -98,11 +103,10 @@ public class ResourceServer {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:4200",
-            "http://localhost:5173",
-            "http://localhost:4173",
-            "https://www.produccionxd.com"
-        ));
+                "http://localhost:4200",
+                "http://localhost:5173",
+                "http://localhost:4173",
+                "https://www.produccionxd.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
