@@ -1,7 +1,10 @@
 package com.hospital.hospital.controller;
 
+import com.hospital.hospital.model.dto.CitaDTO;
 import com.hospital.hospital.model.entity.Cita;
 import com.hospital.hospital.service.CitaService;
+import com.hospital.hospital.util.JwtUtil;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +53,19 @@ public class CitaController {
             return ResponseEntity.ok(citaService.cancelarCita(idCita));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
+    @GetMapping("/citas-medico")
+    public ResponseEntity<?> getMisCitas() {
+        try {
+            Integer idUsuario = JwtUtil.getIdUsuario();
+            List<CitaDTO> citas = citaService.getCitasByMedico(idUsuario);
+            return ResponseEntity.ok(citas);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 }

@@ -1,5 +1,8 @@
 package com.hospital.hospital.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.hospital.hospital.model.converter.TipoSangreConverter;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -37,7 +40,8 @@ public class Paciente {
     @Column(name = "sexo", nullable = false)
     private Sexo sexo;
 
-    @Enumerated(EnumType.STRING)
+    // Sin @Enumerated — el converter maneja la conversión JPA <-> BD
+    @Convert(converter = TipoSangreConverter.class)
     @Column(name = "tipo_sangre")
     private TipoSangre tipoSangre;
 
@@ -67,6 +71,30 @@ public class Paciente {
     }
 
     public enum TipoSangre {
-        A_POS, A_NEG, B_POS, B_NEG, AB_POS, AB_NEG, O_POS, O_NEG
+        A_POS("A+"), A_NEG("A-"),
+        B_POS("B+"), B_NEG("B-"),
+        AB_POS("AB+"), AB_NEG("AB-"),
+        O_POS("O+"), O_NEG("O-");
+
+        private final String valor;
+
+        TipoSangre(String valor) {
+            this.valor = valor;
+        }
+
+        // Serializa a JSON como "O+" en lugar de "O_POS"
+        @JsonValue
+        public String getValor() {
+            return valor;
+        }
+
+        // Acepta "O+", "AB-", etc. desde el JSON entrante
+        @JsonCreator
+        public static TipoSangre fromValor(String v) {
+            for (TipoSangre ts : values()) {
+                if (ts.valor.equalsIgnoreCase(v)) return ts;
+            }
+            throw new IllegalArgumentException("Tipo de sangre inválido: " + v);
+        }
     }
 }
