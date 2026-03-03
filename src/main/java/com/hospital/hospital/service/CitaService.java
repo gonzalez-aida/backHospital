@@ -1,9 +1,11 @@
 package com.hospital.hospital.service;
 
+import com.hospital.hospital.model.dto.CitaDTO;
 import com.hospital.hospital.model.entity.Cita;
 import com.hospital.hospital.model.entity.Medico;
 import com.hospital.hospital.model.entity.Paciente;
 import com.hospital.hospital.model.repository.CitaRepository;
+import com.hospital.hospital.model.repository.MedicoRepository;
 import com.hospital.hospital.model.repository.PacienteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ public class CitaService {
 
     private final CitaRepository citaRepository;
     private final PacienteRepository pacienteRepository;
+    private final MedicoRepository medicoRepository;
 
     // Determina el turno según la hora
     private Medico.Turno determinarTurno(LocalTime hora) {
@@ -89,5 +92,17 @@ public class CitaService {
 
     private String generarFolio() {
         return "CITA-" + System.currentTimeMillis();
+    }
+
+
+    // Obtener todas las citas del médico autenticado
+    public List<CitaDTO> getCitasByMedico(Integer idUsuario) {
+        Medico medico = medicoRepository.findByUsuarioIdUsuario(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Médico no encontrado"));
+
+        return citaRepository.findByMedicoIdMedico(medico.getIdMedico())
+                .stream()
+                .map(CitaDTO::new)
+                .toList();
     }
 }

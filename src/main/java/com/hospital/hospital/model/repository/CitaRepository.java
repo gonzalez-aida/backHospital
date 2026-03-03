@@ -22,4 +22,7 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
     // Médicos por turno
     @Query("SELECT m FROM Medico m WHERE m.turno = :turno AND m.activo = true")
     List<Medico> findMedicosByTurno(@Param("turno") Medico.Turno turno);
+
+    // Citas por medico
+    List<Cita> findByMedicoIdMedico(Integer idMedico);
 }
