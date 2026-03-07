@@ -54,10 +54,10 @@ public class Cita {
     private Medico medico;
 
     public enum EstadoCita {
-        pendiente, proceso, cancelada, completada
+        pendiente, proceso, cancelada, completada, archivada
     }
 
     public enum TipoCita {
-        primera_vez, subsecuente, urgencia, referida
+        primera_vez, subsecuente, urgencia, referida, archivada
     }
 }

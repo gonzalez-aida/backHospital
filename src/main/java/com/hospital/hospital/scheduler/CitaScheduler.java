@@ -1,5 +1,6 @@
 package com.hospital.hospital.scheduler;
 
+import com.hospital.hospital.model.entity.Cita;
 import com.hospital.hospital.model.repository.CitaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +17,15 @@ public class CitaScheduler {
     private final CitaRepository citaRepository;
 
     // Corre todos los días a medianoche
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     @Transactional
-    public void eliminarCitasCanceladas() {
-        LocalDateTime hace2Dias = LocalDateTime.now().minusMinutes(2); // ← cambia esto
-        log.info(">>> Limpiando citas canceladas anteriores a: {}", hace2Dias);
-        citaRepository.eliminarCitasCanceladasAntesDe(hace2Dias);
-        log.info(">>> Limpieza completada");
+    public void archivarCitasCanceladas() {
+        LocalDateTime hace2Dias = LocalDateTime.now().minusDays(2);
+        log.info(">>> Archivando citas canceladas anteriores a: {}", hace2Dias);
+        citaRepository.archivarCitasCanceladas(
+                Cita.EstadoCita.archivada,
+                Cita.EstadoCita.cancelada,
+                hace2Dias);
+        log.info(">>> Archivado completado");
     }
 }
