@@ -3,11 +3,13 @@ package com.hospital.hospital.model.repository;
 import com.hospital.hospital.model.entity.Cita;
 import com.hospital.hospital.model.entity.Medico;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -25,4 +27,5 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
 
     // Citas por medico
     List<Cita> findByMedicoIdMedico(Integer idMedico);
+
 }

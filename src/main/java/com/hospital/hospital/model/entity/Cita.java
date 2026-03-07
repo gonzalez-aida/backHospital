@@ -3,6 +3,7 @@ package com.hospital.hospital.model.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Data
@@ -40,6 +41,9 @@ public class Cita {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado")
     private EstadoCita estado = EstadoCita.pendiente;
+
+    @Column(name = "fecha_creacion")
+    private LocalDateTime fechaCreacion;
 
     @ManyToOne
     @JoinColumn(name = "id_paciente")

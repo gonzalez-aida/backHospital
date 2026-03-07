@@ -1,0 +1,27 @@
+package com.hospital.hospital.scheduler;
+
+import com.hospital.hospital.model.repository.CitaRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class CitaScheduler {
+
+    private final CitaRepository citaRepository;
+
+    // Corre todos los días a medianoche
+    @Scheduled(cron = "0 * * * * *")
+    @Transactional
+    public void eliminarCitasCanceladas() {
+        LocalDateTime hace2Dias = LocalDateTime.now().minusMinutes(2); // ← cambia esto
+        log.info(">>> Limpiando citas canceladas anteriores a: {}", hace2Dias);
+        citaRepository.eliminarCitasCanceladasAntesDe(hace2Dias);
+        log.info(">>> Limpieza completada");
+    }
+}
